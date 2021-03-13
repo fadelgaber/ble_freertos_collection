@@ -134,6 +134,7 @@ export PROJECTPATH
 endif
 
 CONFIG := $(PROJECTPATH)/gcc/$(BOARD)/bin
+CONFIGLITE := /home/fadel/Desktop/Projects/ml/tensorflow/tensorflow/lite/micro/tools/make/gen
 $(warning CONFIG=$(CONFIG))
 
 #******************************************************************************
@@ -256,7 +257,6 @@ VPATH+=:
 #librarys to include
 LIBS = $(SDKPATH)/mcu/apollo3/hal/gcc/bin/libam_hal.a
 LIBS+= $(BOARDPATH)/bsp/gcc/bin/libam_bsp.a
-LIBS+=
 
 # Compilation Units (Add all the .c files you need to compile)
 SRC = smpi_act.c
@@ -431,7 +431,6 @@ SRC += startup_gcc.c
 SRC+= accelerometer_functions.c
 SRC+= lis2dh12_reg.c
 SRC+= lis2dh12_platform_apollo3.c
-SRC +=
 
 ### Bootloader Tools
 ASB_UPLOADER=$(PYTHON3) $(COMMONPATH)/tools_sfe/asb/asb.py
@@ -521,6 +520,7 @@ $(CONFIG):
 
 $(CONFIG)/%.o: %.c $(CONFIG)/%.d
 	@echo " Compiling $(COMPILERNAME) $<" ;\
+	
 	$(CC) -c $(CFLAGS) $< -o $@
 
 $(CONFIG)/%.o: %.s $(CONFIG)/%.d
@@ -529,6 +529,8 @@ $(CONFIG)/%.o: %.s $(CONFIG)/%.d
 
 $(CONFIG)/$(TARGET)_asb.axf: LINKER_FILE := $(COMMONPATH)/examples/ble_freertos_dats/gcc/ble_freertos_dats.ld
 $(CONFIG)/$(TARGET)_asb.axf: $(OBJS) $(LIBS)
+
+	@echo " Files are ${OBJS} $<" ;\
 	@echo " Linking $(COMPILERNAME) $@ with script $(LINKER_FILE)";\
 	$(CC) -Wl,-T,$(LINKER_FILE) -o $@ $(OBJS) $(LFLAGS)
 

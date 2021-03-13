@@ -32,13 +32,14 @@ SOFTWARE.
 
 //
 // Function Declarations
-uint32_t initAccel(void);
+uint32_t initDatsAccelerometer(void);
 
 //
 // Global Variables
+
 axis3bit16_t data_raw_acceleration;
 axis1bit16_t data_raw_temperature;
-float acceleration_mg[3];
+float acceleration_mg[15];
 float temperature_degC;
 
 lis2dh12_platform_apollo3_if_t dev_if = {
@@ -70,16 +71,14 @@ void accelSetup( void ){
     am_util_stdio_terminal_clear();
 
     // Initialize accelerometer (uses board-specific code -- see function below)
-    stat = initAccel();
+    stat = initDatsAccelerometer();
     if( stat != 0 ){
         am_util_stdio_printf("Accelerometer initialization failed with code: %d\n", stat);
     }
     am_util_stdio_printf("Accelerometer initialization successful");
 }
 
-void getAccelerometerReadings(void){
-        am_hal_gpio_output_set(AM_BSP_GPIO_LED_GREEN);
-        
+int getAccelerometerReadings(int index){
         lis2dh12_reg_t reg;
 
         // Check if accelerometer is ready with new acceleration data
@@ -89,17 +88,18 @@ void getAccelerometerReadings(void){
             lis2dh12_acceleration_raw_get(&dev_ctx, data_raw_acceleration.u8bit);
 
             /* convert to mg */
-            acceleration_mg[0] = lis2dh12_from_fs2_hr_to_mg(data_raw_acceleration.i16bit[0]);
-            acceleration_mg[1] = lis2dh12_from_fs2_hr_to_mg(data_raw_acceleration.i16bit[1]);
-            acceleration_mg[2] = lis2dh12_from_fs2_hr_to_mg(data_raw_acceleration.i16bit[2]);
+            acceleration_mg[index++] = lis2dh12_from_fs2_hr_to_mg(data_raw_acceleration.i16bit[0]);
+            acceleration_mg[index++] = lis2dh12_from_fs2_hr_to_mg(data_raw_acceleration.i16bit[1]);
+            acceleration_mg[index++] = lis2dh12_from_fs2_hr_to_mg(data_raw_acceleration.i16bit[2]);
 
             // Print results if acceleration data was ready
-            am_util_stdio_printf("%04.2f,%04.2f,%04.2f\r\n", acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
+            //am_util_stdio_printf("%04.2f,%04.2f,%04.2f\r\n", acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
         }
+
+        return index;
 }
 
-
-uint32_t initAccel( void ){
+uint32_t initDatsAccelerometer( void ){
 
     uint32_t retVal32 = 0;
     static uint8_t whoamI = 0;
